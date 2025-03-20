@@ -1,0 +1,382 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* This file is for your main application CSS */
+
+/* Game theme colors */
+:root {
+  --primary-bg: #f9fafb;
+  --score-color: #4f46e5;
+  --control-bg: #e0e7ff;
+  --control-hover: #c7d2fe;
+  --panel-bg: rgba(255, 255, 255, 0.7);
+  --panel-border: rgba(209, 213, 219, 0.5);
+  --panel-shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* General styles */
+body {
+  background-color: var(--primary-bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Glass panel styling */
+.glass-panel {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px var(--panel-shadow);
+  transition: all 0.3s ease;
+}
+
+.glass-panel.no-shadow {
+  box-shadow: none;
+}
+
+/* Game board styling */
+.game-board-container {
+  background: rgba(220, 224, 229, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  touch-action: none; /* Prevent all browser handling of touch events */
+  -webkit-user-select: none; /* Prevent text selection on Safari */
+  user-select: none; /* Prevent text selection */
+}
+
+/* Cell background styling */
+.cell-background {
+  background-color: rgba(233, 237, 241, 0.8);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Game tile styling */
+.game-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease-in-out;
+}
+
+/* Tile animation */
+.tile-new {
+  animation: tile-appear 0.2s ease-in-out;
+}
+
+.tile-merged {
+  animation: tile-merge 0.2s ease-in-out;
+}
+
+@keyframes tile-appear {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tile-merge {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Score highlight animation */
+.highlight-score {
+  animation: score-highlight 1.5s ease-in-out;
+}
+
+@keyframes score-highlight {
+  0% {
+    background-color: var(--panel-bg);
+  }
+  50% {
+    background-color: rgba(224, 231, 255, 0.9);
+  }
+  100% {
+    background-color: var(--panel-bg);
+  }
+}
+
+/* Button styling */
+.game-button {
+  background-color: var(--control-bg);
+  color: rgb(55, 48, 163);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.game-button:hover {
+  background-color: var(--control-hover);
+}
+
+.game-button:active {
+  transform: translateY(1px);
+}
+
+/* Mobile specific enhancements */
+.mobile-device .touch-controls {
+  margin-top: 0.5rem;
+  opacity: 0.9; /* Make touch controls slightly transparent */
+}
+
+.mobile-device .touch-button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.mobile-device .touch-button:active {
+  transform: scale(0.95);
+  background-color: rgba(165, 180, 252, 0.8) !important;
+}
+
+/* Disable swipe gestures when using touch controls only */
+.touch-controls-only {
+  touch-action: auto !important;
+}
+
+/* Make touch controls easier to press on smaller screens */
+@media (max-width: 360px) {
+  .touch-button {
+    height: 4rem !important;
+    font-size: 1.75rem !important;
+  }
+}
+
+/* Add active state styling for better touch feedback */
+.touch-button:active {
+  background-color: #a5b4fc !important;
+  transform: scale(0.95);
+}
+
+/* Game styles */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Glass panel effect */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Cell background */
+.cell-background {
+  background: rgba(220, 220, 230, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  min-height: 60px;
+}
+
+/* Game button styles */
+.game-button {
+  background: linear-gradient(to bottom, #4f46e5, #4338ca);
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 4px 10px rgba(67, 56, 202, 0.3);
+}
+
+.game-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(67, 56, 202, 0.4);
+}
+
+.game-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(67, 56, 202, 0.3);
+}
+
+.game-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.game-button:hover::after {
+  opacity: 1;
+}
+
+/* Game board container */
+.game-board-container:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* Game board styles */
+.game-tile {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1/1;
+  transform-origin: center;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: transform 280ms cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s ease;
+  font-weight: bold;
+  user-select: none;
+}
+
+.game-tile span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 2rem;
+}
+
+.game-tile::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.game-tile:not(.tile-new):not(.tile-merged):hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Animation for new tiles */
+@keyframes appear {
+  0% { opacity: 0; transform: scale(0); }
+  50% { opacity: 0.8; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.tile-new {
+  animation: appear 250ms ease-out forwards;
+  transform-origin: center;
+  animation-fill-mode: both;
+}
+
+/* Animation for merging tiles */
+@keyframes merge {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.tile-merged {
+  animation: merge 180ms ease-in-out;
+  z-index: 20;
+}
+
+/* High score animation */
+@keyframes highlight {
+  0% { background-color: rgba(250, 204, 21, 0.3); }
+  50% { background-color: rgba(254, 243, 199, 0.7); }
+  100% { background-color: rgba(255, 255, 255, 0.7); }
+}
+
+.highlight-score {
+  animation: highlight 1.5s ease-in-out;
+}
+
+/* Slide animations */
+@keyframes slide-left {
+  0% { transform: translateX(3%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slide-right {
+  0% { transform: translateX(-3%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slide-up {
+  0% { transform: translateY(3%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  0% { transform: translateY(-3%); }
+  100% { transform: translateY(0); }
+}
+
+/* Add these classes to JSHook to apply during transitions */
+.slide-active {
+  transition-duration: 180ms !important;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible, 
+#game-board:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Score display effects */
+.score-display {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease;
+}
+
+/* Subtle animation when score changes */
+@keyframes score-change {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.score-changed {
+  animation: score-change 0.3s ease-in-out;
+}
+
+/* No shadow variant */
+.no-shadow {
+  box-shadow: none !important;
+}

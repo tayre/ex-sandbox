@@ -1,0 +1,105 @@
+<div class="min-h-screen w-full p-4" phx-window-keydown="keydown">
+  <div class="max-w-5xl mx-auto">
+    <!-- Main layout with grid -->
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+      <!-- High Scores - Left column on desktop, Bottom on mobile -->
+      <div class="md:col-span-1 md:min-w-[140px] mb-4 md:mb-0 order-last md:order-first">
+        <div id="high-scores-panel" class={"glass-panel rounded-lg p-3 #{if @highlight_score, do: "highlight-score", else: ""}"} phx-hook="LocalTime">
+          <h2 class="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">High Scores</h2>
+          <div class="divide-y divide-gray-100">
+            <%= if Enum.empty?(@high_scores) do %>
+              <p class="py-1 text-gray-500 text-xs">No scores yet!</p>
+            <% else %>
+              <%= for {score, timestamp} <- @high_scores do %>
+                <div class="py-1.5 flex items-center">
+                  <span class="font-medium text-sm mr-auto"><%= score %></span>
+                  <span class="text-gray-500 text-xs flex-shrink-0 whitespace-nowrap"><%= raw(format_date(timestamp)) %></span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Game and controls - Right columns on desktop -->
+      <div class="md:col-span-5 flex flex-col items-center order-first md:order-first">
+        <div class="flex justify-center w-full max-w-md mb-4">
+          <div class="glass-panel rounded p-3 no-shadow">
+            <div class="text-sm text-gray-600 uppercase tracking-wide text-center">Score</div>
+            <div class="text-2xl font-bold score-display text-center"><%= @game.score %></div>
+          </div>
+        </div>
+        
+        <%= if @alert do %>
+          <div class="w-full max-w-md bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-4 shadow-sm">
+            <%= @alert %>
+          </div>
+        <% end %>
+        
+        <!-- Game board grid with individual animated tiles -->
+        <div id="game-board" 
+             phx-hook="GameBoard"
+             class="game-board-container relative w-full aspect-square max-w-md rounded-lg p-3 mb-4 overflow-hidden"
+             tabindex="0">
+          <!-- Background grid cells -->
+          <div class="grid grid-cols-4 grid-rows-4 gap-3 h-full w-full">
+            <%= for _ <- 0..15 do %>
+              <div class="cell-background rounded-md aspect-square"></div>
+            <% end %>
+          </div>
+          
+          <!-- Tiles are positioned in the grid -->
+          <div id="tiles-container" class="absolute top-3 left-3 right-3 bottom-3 grid grid-cols-4 grid-rows-4 gap-3">
+            <%= for tile <- @tiles_list do %>
+              <div id={tile.id}
+                   class={"game-tile #{tile_color(tile.value)} #{font_size(tile.value)}
+                           #{if is_new_tile?(tile.id, @game), do: "tile-new", else: ""} 
+                           #{if is_merged_tile?(tile) && @just_moved, do: "tile-merged", else: ""}"}
+                   style={tile_position(tile.row, tile.col)}>
+                <span><%= tile.value %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Mobile touch controls - Enhanced and more prominent -->
+        <div class="touch-controls mb-4 w-full max-w-md md:hidden">
+          <div class="grid grid-cols-3 gap-3">
+            <div></div>
+            <button phx-click="move" phx-value-direction="up" 
+                    class="touch-button h-16 rounded-lg text-2xl flex items-center justify-center bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 shadow-md">
+              ↑
+            </button>
+            <div></div>
+            
+            <button phx-click="move" phx-value-direction="left" 
+                    class="touch-button h-16 rounded-lg text-2xl flex items-center justify-center bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 shadow-md">
+              ←
+            </button>
+            <button phx-click="move" phx-value-direction="down" 
+                    class="touch-button h-16 rounded-lg text-2xl flex items-center justify-center bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 shadow-md">
+              ↓
+            </button>
+            <button phx-click="move" phx-value-direction="right" 
+                    class="touch-button h-16 rounded-lg text-2xl flex items-center justify-center bg-indigo-100 hover:bg-indigo-200 active:bg-indigo-300 shadow-md">
+              →
+            </button>
+          </div>
+          <div class="text-xs text-center text-gray-500 mt-2">You can also swipe directly on the game board</div>
+        </div>
+        
+        <!-- New Game button centered at the bottom -->
+        <div class="w-full max-w-md flex justify-center mb-6">
+          <button phx-click="new_game" class="game-button px-6 py-3 rounded-lg text-base">
+            New Game
+          </button>
+        </div>
+        
+        <div class="mt-2 text-gray-600 text-center text-sm">
+          <p class="md:block hidden">Use arrow keys to move the tiles. When two tiles with the same number touch, they merge into one!</p>
+          <p class="md:hidden block">Tap the arrow buttons or swipe on the board. When two tiles with the same number touch, they merge into one!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
