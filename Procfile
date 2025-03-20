@@ -1,1 +1,1 @@
-web: mix phx.server 
+web: cd 2048 && mix phx.server 
