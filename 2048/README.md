@@ -2,6 +2,8 @@
 
 A 2048 game clone built with Elixir and Phoenix LiveView.
 
+Try it Live @ [http://2048.hal9k.ca/](http://2048.hal9k.ca/)
+
 <img width="486" alt="2048_game" src="https://github.com/user-attachments/assets/24f843be-a71f-4e46-8c20-c4cf6f4102f6" />
 
 
