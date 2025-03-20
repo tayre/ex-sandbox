@@ -97,31 +97,36 @@ defmodule Game2048Web.GameLive do
       # Save the old state to compare later
       old_game = socket.assigns.game
       
-      # Make the move
-      game = GameServer.move(direction)
-      
-      # Check for game state changes
-      alert = cond do
-        game.won -> "You win! Keep playing for a higher score."
-        game.game_over -> "Game over! Press New Game to try again."
-        true -> nil
-      end
-      
-      # Only update if the board actually changed
-      if game != old_game do
-        # Extract tiles for display
-        tiles_list = extract_tiles_for_display(game)
-        
-        # Set the just_moved flag to trigger animations
-        {:noreply, assign(socket, 
-          game: game, 
-          alert: alert, 
-          last_direction: direction,
-          tiles_list: tiles_list,
-          just_moved: true
-        )}
+      # Skip move processing if game is over
+      if old_game.game_over do
+        {:noreply, socket}
       else
-        {:noreply, assign(socket, game: game, alert: alert)}
+        # Make the move
+        game = GameServer.move(direction)
+        
+        # Check for game state changes
+        alert = cond do
+          # Don't show "You win" alert since we have the overlay
+          game.game_over -> "Game over!"
+          true -> nil
+        end
+        
+        # Only update if the board actually changed
+        if game != old_game do
+          # Extract tiles for display
+          tiles_list = extract_tiles_for_display(game)
+          
+          # Set the just_moved flag to trigger animations
+          {:noreply, assign(socket, 
+            game: game, 
+            alert: alert, 
+            last_direction: direction,
+            tiles_list: tiles_list,
+            just_moved: true
+          )}
+        else
+          {:noreply, assign(socket, game: game, alert: alert)}
+        end
       end
     else
       {:noreply, socket}
@@ -135,31 +140,36 @@ defmodule Game2048Web.GameLive do
     # Save the old state to compare later
     old_game = socket.assigns.game
     
-    # Make the move
-    game = GameServer.move(dir)
-    
-    # Check for game state changes
-    alert = cond do
-      game.won -> "You win! Keep playing for a higher score."
-      game.game_over -> "Game over! Press New Game to try again."
-      true -> nil
-    end
-    
-    # Only update if the board actually changed
-    if game != old_game do
-      # Extract tiles for display
-      tiles_list = extract_tiles_for_display(game)
-      
-      # Set the just_moved flag to trigger animations
-      {:noreply, assign(socket, 
-        game: game, 
-        alert: alert, 
-        last_direction: dir,
-        tiles_list: tiles_list,
-        just_moved: true
-      )}
+    # Skip move processing if game is over
+    if old_game.game_over do
+      {:noreply, socket}
     else
-      {:noreply, assign(socket, game: game, alert: alert)}
+      # Make the move
+      game = GameServer.move(dir)
+      
+      # Check for game state changes
+      alert = cond do
+        # Don't show "You win" alert since we have the overlay
+        game.game_over -> "Game over!"
+        true -> nil
+      end
+      
+      # Only update if the board actually changed
+      if game != old_game do
+        # Extract tiles for display
+        tiles_list = extract_tiles_for_display(game)
+        
+        # Set the just_moved flag to trigger animations
+        {:noreply, assign(socket, 
+          game: game, 
+          alert: alert, 
+          last_direction: dir,
+          tiles_list: tiles_list,
+          just_moved: true
+        )}
+      else
+        {:noreply, assign(socket, game: game, alert: alert)}
+      end
     end
   end
   
@@ -169,23 +179,74 @@ defmodule Game2048Web.GameLive do
     {:noreply, assign(socket, just_moved: false)}
   end
 
+  # Handle forced win from JavaScript console
+  @impl true
+  def handle_event("force_win", _, socket) do
+    # Get the current game state
+    game = socket.assigns.game
+    
+    # Create a modified game state with win condition
+    updated_game = %{game | won: true}
+    
+    # Save the updated game state in the server
+    GameServer.update_state(updated_game)
+    
+    # Update tiles for display
+    tiles_list = extract_tiles_for_display(updated_game)
+    
+    # Return the updated game state and trigger confetti
+    {:noreply, socket
+      |> assign(game: updated_game, alert: nil, tiles_list: tiles_list)
+      |> push_event("game_won", %{})}
+  end
+
+  # Handle forced lose from JavaScript console
+  @impl true
+  def handle_event("force_lose", _, socket) do
+    # Get the current game state
+    game = socket.assigns.game
+    
+    # Create a modified game state with game over condition
+    updated_game = %{game | game_over: true}
+    
+    # Save the updated game state in the server
+    GameServer.update_state(updated_game)
+    
+    # Update tiles for display
+    tiles_list = extract_tiles_for_display(updated_game)
+    
+    # Return the updated game state
+    {:noreply, assign(socket, 
+      game: updated_game, 
+      alert: "Game over!",
+      tiles_list: tiles_list
+    )}
+  end
+
   @impl true
   def handle_info({:game_updated, game}, socket) do
     # Handle game updates from the GameServer
     alert = cond do
-      game.won -> "You win! Keep playing for a higher score."
-      game.game_over -> "Game over! Press New Game to try again."
+      # Don't show "You win" alert since we have the overlay
+      game.game_over -> "Game over!"
       true -> nil
     end
     
     # Extract tiles for display
     tiles_list = extract_tiles_for_display(game)
     
-    {:noreply, assign(socket, 
-      game: game, 
-      alert: alert,
-      tiles_list: tiles_list
-    )}
+    # Check if the game was just won and trigger confetti
+    if game.won and not socket.assigns.game.won do
+      {:noreply, socket
+        |> assign(game: game, alert: alert, tiles_list: tiles_list)
+        |> push_event("game_won", %{})}
+    else
+      {:noreply, assign(socket, 
+        game: game, 
+        alert: alert,
+        tiles_list: tiles_list
+      )}
+    end
   end
   
   @impl true

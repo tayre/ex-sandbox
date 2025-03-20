@@ -1,19 +1,35 @@
-<div class="min-h-screen w-full p-4" phx-window-keydown="keydown">
+<div class="min-h-screen w-full p-4" phx-window-keydown="keydown" phx-hook="WinFunction" id="game-container">
+  <!-- Full-screen confetti container (positioned outside the game board) -->
+  <%= if @game.won do %>
+    <div id="fullscreen-confetti" class="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      <%= for i <- 1..70 do %>
+        <div class="confetti" 
+             style={"left: #{:rand.uniform(100)}%; 
+                    animation-delay: #{:rand.uniform(1500)/1000}s;
+                    width: #{2 + :rand.uniform(4)}px;
+                    height: #{2 + :rand.uniform(4)}px;
+                    #{if :rand.uniform(100) > 60, do: "border-radius: 50%;", else: ""}
+                    background-color: #{Enum.random(["#f00", "#0f0", "#00f", "#ff0", "#f0f", "#0ff", "#ff8800", "#8800ff"])};"}>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="max-w-5xl mx-auto">
     <!-- Main layout with grid -->
     <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
       <!-- High Scores - Left column on desktop, Bottom on mobile -->
       <div class="md:col-span-1 md:min-w-[140px] mb-4 md:mb-0 order-last md:order-first">
-        <div id="high-scores-panel" class={"glass-panel rounded-lg p-3 #{if @highlight_score, do: "highlight-score", else: ""}"} phx-hook="LocalTime">
+        <div id="high-scores-panel" class={"glass-panel rounded-lg p-4 px-5 #{if @highlight_score, do: "highlight-score", else: ""}"} phx-hook="LocalTime">
           <h2 class="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">High Scores</h2>
           <div class="divide-y divide-gray-100">
             <%= if Enum.empty?(@high_scores) do %>
               <p class="py-1 text-gray-500 text-xs">No scores yet!</p>
             <% else %>
               <%= for {score, timestamp} <- @high_scores do %>
-                <div class="py-1.5 flex items-center">
-                  <span class="font-medium text-sm mr-auto"><%= score %></span>
-                  <span class="text-gray-500 text-xs flex-shrink-0 whitespace-nowrap"><%= raw(format_date(timestamp)) %></span>
+                <div class="py-2 flex flex-col">
+                  <span class="font-medium text-xl"><%= score %></span>
+                  <span class="text-gray-500 text-xs"><%= raw(format_date(timestamp)) %></span>
                 </div>
               <% end %>
             <% end %>
@@ -30,7 +46,7 @@
           </div>
         </div>
         
-        <%= if @alert do %>
+        <%= if @alert && !@game.game_over do %>
           <div class="w-full max-w-md bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-4 shadow-sm">
             <%= @alert %>
           </div>
@@ -60,6 +76,24 @@
               </div>
             <% end %>
           </div>
+          
+          <!-- Game Over Overlay -->
+          <%= if @game.game_over || @game.won do %>
+            <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg z-10">
+              <div class="bg-white rounded-lg p-6 text-center max-w-xs mx-auto shadow-xl">
+                <%= if @game.won do %>
+                  <h2 class="text-2xl font-bold mb-3 text-green-600">Congratulations!</h2>
+                  <p class="text-lg mb-4">You reached <%= Game2048.Game.winning_tile() %>! Your score: <span class="font-bold"><%= @game.score %></span></p>
+                <% else %>
+                  <h2 class="text-2xl font-bold mb-3">Game Over!</h2>
+                  <p class="text-lg mb-4">Your score: <span class="font-bold"><%= @game.score %></span></p>
+                <% end %>
+                <button phx-click="new_game" class="game-button px-6 py-3 rounded-lg text-base w-full">
+                  Play Again
+                </button>
+              </div>
+            </div>
+          <% end %>
         </div>
         
         <!-- Mobile touch controls - Enhanced and more prominent -->
@@ -95,9 +129,17 @@
           </button>
         </div>
         
+        <!-- Instruction text at the bottom -->
         <div class="mt-2 text-gray-600 text-center text-sm">
-          <p class="md:block hidden">Use arrow keys to move the tiles. When two tiles with the same number touch, they merge into one!</p>
-          <p class="md:hidden block">Tap the arrow buttons or swipe on the board. When two tiles with the same number touch, they merge into one!</p>
+          <% cond do %>
+            <% @game.won -> %>
+              <p>Congratulations! You reached <%= Game2048.Game.winning_tile() %>!</p>
+            <% @game.game_over -> %>
+              <p>Nice work! Press New Game to start another round</p>
+            <% true -> %>
+              <p class="md:block hidden">Use arrow keys to move the tiles. When two tiles with the same number touch, they merge into one!</p>
+              <p class="md:hidden block">Tap the arrow buttons or swipe on the board. When two tiles with the same number touch, they merge into one!</p>
+          <% end %>
         </div>
       </div>
     </div>

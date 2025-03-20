@@ -162,9 +162,77 @@ Hooks.LocalTime = {
       const utcTime = el.getAttribute('data-utc');
       if (utcTime) {
         const date = new Date(utcTime + 'Z');
-        el.textContent = date.toLocaleString([], { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        // Format: 3/20, 4:36 PM
+        const options = { 
+          month: 'numeric', 
+          day: 'numeric',
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true
+        };
+        el.innerHTML = date.toLocaleString([], options);
       }
     });
+  }
+};
+
+// Hook to expose win function to console
+Hooks.WinFunction = {
+  mounted() {
+    // Expose the win function to the global scope
+    window.win = () => {
+      this.pushEvent('force_win', {});
+    };
+    
+    // Expose the lost function to the global scope
+    window.lost = () => {
+      this.pushEvent('force_lose', {});
+    };
+    
+    // Listen for when the game is won to trigger confetti effects
+    this.handleEvent('game_won', () => {
+      this.addExtraConfetti();
+    });
+  },
+  
+  // Add extra confetti for more celebration
+  addExtraConfetti() {
+    const container = document.querySelector('#fullscreen-confetti');
+    if (container) {
+      // Add 30 more confetti pieces dynamically
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.animationDelay = `${Math.random() * 3}s`;
+        confetti.style.opacity = `${0.5 + Math.random() * 0.5}`;
+        
+        // Completely randomize size within a small range (2-6px)
+        const size = 2 + Math.random() * 4;
+        
+        // Randomize shape
+        if (Math.random() > 0.6) {
+          // Circle
+          confetti.style.borderRadius = '50%';
+          confetti.style.width = `${size}px`;
+          confetti.style.height = `${size}px`;
+        } else if (Math.random() > 0.6) {
+          // Rectangle
+          confetti.style.width = `${size * 0.7}px`;
+          confetti.style.height = `${size * 1.5}px`;
+        } else {
+          // Square
+          confetti.style.width = `${size}px`;
+          confetti.style.height = `${size}px`;
+        }
+        
+        // Random colors
+        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff', '#ff8800', '#8800ff'];
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        container.appendChild(confetti);
+      }
+    }
   }
 };
 
@@ -182,6 +250,9 @@ window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()
+
+// Disable LiveView debug logs in the console
+liveSocket.disableDebug()
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()

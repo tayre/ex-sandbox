@@ -47,6 +47,13 @@ defmodule Game2048.GameServer do
   end
 
   @doc """
+  Updates the game state directly (used for debugging/testing).
+  """
+  def update_state(game) do
+    GenServer.call(__MODULE__, {:update_state, game})
+  end
+
+  @doc """
   Submits a score when the game is over.
   """
   def submit_score(score) when is_integer(score) and score > 0 do
@@ -81,24 +88,38 @@ defmodule Game2048.GameServer do
 
   @impl true
   def handle_call({:move, direction}, _from, game) do
-    new_game = Game.move(game, direction)
-    
-    # Only broadcast if the game state changed
-    if new_game != game do
-      # If the game just ended, save the score
-      if new_game.game_over and not game.game_over and new_game.score > 0 do
-        is_high_score = ScoreStore.submit_score(new_game.score)
-        
-        # Broadcast the high score update
-        if is_high_score do
-          PubSub.broadcast(@pubsub, @topic, {:new_high_score, new_game.score})
+    # Don't process moves if the game is already over
+    if game.game_over do
+      {:reply, game, game}
+    else
+      new_game = Game.move(game, direction)
+      
+      # Only broadcast if the game state changed
+      if new_game != game do
+        # If the game just ended, save the score
+        if new_game.game_over and not game.game_over and new_game.score > 0 do
+          is_high_score = ScoreStore.submit_score(new_game.score)
+          
+          # Broadcast the high score update
+          if is_high_score do
+            PubSub.broadcast(@pubsub, @topic, {:new_high_score, new_game.score})
+          end
         end
+        
+        # Broadcast game state update
+        PubSub.broadcast(@pubsub, @topic, {:game_updated, new_game})
       end
       
-      # Broadcast game state update
-      PubSub.broadcast(@pubsub, @topic, {:game_updated, new_game})
+      {:reply, new_game, new_game}
     end
+  end
+
+  @impl true
+  def handle_call({:update_state, new_game}, _from, _game) do
+    # Broadcast the updated game state
+    PubSub.broadcast(@pubsub, @topic, {:game_updated, new_game})
     
+    # Return and store the new game state
     {:reply, new_game, new_game}
   end
 end

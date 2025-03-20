@@ -56,18 +56,25 @@ defmodule Game2048.Game do
   @spec move(t(), direction()) :: t()
   def move(%__MODULE__{game_over: true} = game, _direction), do: game
   def move(%__MODULE__{board: board, score: score, tiles: tiles, next_id: next_id} = game, direction) do
-    # Process the move
-    {new_board, new_tiles, new_score, new_next_id, moved} = 
-      Movement.move(board, tiles, score, next_id, direction)
-    
-    # Only update if the tiles actually moved
-    if moved do
-      %{game | board: new_board, score: new_score, tiles: new_tiles, next_id: new_next_id}
-      |> add_random_tile()
-      |> check_win()
-      |> check_game_over()
-    else
-      game
+    try do
+      # Process the move
+      {new_board, new_tiles, new_score, new_next_id, moved} = 
+        Movement.move(board, tiles, score, next_id, direction)
+      
+      # Only update if the tiles actually moved
+      if moved do
+        %{game | board: new_board, score: new_score, tiles: new_tiles, next_id: new_next_id}
+        |> add_random_tile()
+        |> check_win()
+        |> check_game_over()
+      else
+        game
+      end
+    rescue
+      # If any error occurs during move processing, return the original game state
+      exception ->
+        IO.puts("Error during move: #{inspect(exception)}")
+        game
     end
   end
 
@@ -89,11 +96,18 @@ defmodule Game2048.Game do
   """
   @spec check_game_over(t()) :: t()
   def check_game_over(%__MODULE__{board: board} = game) do
-    # Game is over if the board is full and no moves are possible
-    if not Movement.moves_available?(board) do
-      %{game | game_over: true}
-    else
-      game
+    try do
+      # Game is over if the board is full and no moves are possible
+      if not Movement.moves_available?(board) do
+        %{game | game_over: true}
+      else
+        game
+      end
+    rescue
+      # If there's any error during the check, don't crash
+      _ -> 
+        # Default to not game over in case of error
+        game
     end
   end
 end
