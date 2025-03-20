@@ -2,7 +2,10 @@
 
 A 2048 game clone built with Elixir and Phoenix LiveView.
 
-## How to Run Locally
+<img width="486" alt="2048_game" src="https://github.com/user-attachments/assets/24f843be-a71f-4e46-8c20-c4cf6f4102f6" />
+
+
+## Run Locally
 
 To start your Phoenix server:
 
@@ -10,7 +13,7 @@ To start your Phoenix server:
 2. Start Phoenix endpoint with `mix phx.server`
 3. Visit [`localhost:4000`](http://localhost:4000) from your browser
 
-## Game Overview
+## Overview
 
 2048 is a sliding tile puzzle game where the objective is to combine tiles with the same numbers to create a tile with the value 2048. 
 
