@@ -2,7 +2,7 @@
   <!-- Full-screen confetti container (positioned outside the game board) -->
   <%= if @game.won do %>
     <div id="fullscreen-confetti" class="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      <%= for i <- 1..70 do %>
+      <%= for _i <- 1..70 do %>
         <div class="confetti" 
              style={"left: #{:rand.uniform(100)}%; 
                     animation-delay: #{:rand.uniform(1500)/1000}s;
@@ -131,7 +131,7 @@
         
         <!-- Instruction text at the bottom -->
         <div class="mt-2 text-gray-600 text-center text-sm">
-          <% cond do %>
+          <%= cond do %>
             <% @game.won -> %>
               <p>Congratulations! You reached <%= Game2048.Game.winning_tile() %>!</p>
             <% @game.game_over -> %>
