@@ -2,10 +2,7 @@
 
 A 2048 game clone built with Elixir and Phoenix LiveView.
 
-Try it Live @ [http://2048.hal9k.ca/](http://2048.hal9k.ca/)
-
 <img width="486" alt="2048_game" src="https://github.com/user-attachments/assets/24f843be-a71f-4e46-8c20-c4cf6f4102f6" />
-
 
 ## Run Locally
 
@@ -17,15 +14,7 @@ To start your Phoenix server:
 
 ## Overview
 
-2048 is a sliding tile puzzle game where the objective is to combine tiles with the same numbers to create a tile with the value 2048. 
-
-Features:
-- Classic 2048 gameplay - merge tiles to reach 2048!
-- Keyboard controls (arrow keys)
-- Touch controls for mobile devices
-- Smooth tile slide animations
-- High score tracking system
-- Real-time updates via Phoenix LiveView
+This is a clone of 2048 - a sliding tile puzzle game where the objective is to combine tiles with the same numbers to create a tile with the value 2048. 
 
 ## Project Structure
 
@@ -61,7 +50,7 @@ lib/
 - **Movement**: Handles all aspects of moving tiles in different directions
 - **ScoreStore**: Manages high score persistence and retrieval
 
-## Elixir Features
+## Highlighting Elixir Features
 
 ### Pattern Matching
 
@@ -91,20 +80,11 @@ The game leverages Elixir's immutable data structures for the game board:
 
 ### GenServer for State Management
 
-The game uses Elixir's GenServer behavior to manage the game state:
+The game uses Elixir's GenServer behaviour to manage the game state:
 
 - Provides a clean API for game operations (new_game, move)
 - Maintains game state between player actions
 - Handles message passing between the game logic and the UI
-
-### Module Attributes
-
-Module attributes are used for configuration values and constants:
-
-```elixir
-@winning_tile 2048
-@board_size 4
-```
 
 ### Type Specifications
 
