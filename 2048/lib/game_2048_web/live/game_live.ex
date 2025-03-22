@@ -4,23 +4,31 @@ defmodule Game2048Web.GameLive do
   alias Phoenix.PubSub
 
   @pubsub Game2048.PubSub
-  @topic "game:updates"
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    # Create or retrieve a player-specific identifier
+    player_id = session["_csrf_token"] || "user_#{:crypto.strong_rand_bytes(8) |> Base.encode16()}"
+    
+    # Create or get a player-specific game server
+    {:ok, game_pid} = GameServer.start_player(player_id)
+    
+    # Subscribe to updates only for this player's game
+    topic = "game:#{player_id}"
     if connected?(socket) do
-      # Subscribe to game updates
-      PubSub.subscribe(@pubsub, @topic)
+      PubSub.subscribe(@pubsub, topic)
     end
 
-    # Get the current game state and high scores
-    game = GameServer.get_state()
-    high_scores = GameServer.get_high_scores()
+    # Get this player's game state and high scores
+    game = GameServer.get_state(game_pid)
+    high_scores = GameServer.get_player_high_scores(player_id)
     
     # Extract all tiles from the game state for display
     tiles_list = extract_tiles_for_display(game)
 
     {:ok, assign(socket, 
+      player_id: player_id,
+      game_pid: game_pid,
       game: game, 
       alert: nil,
       high_scores: high_scores,
@@ -66,8 +74,10 @@ defmodule Game2048Web.GameLive do
 
   @impl true
   def handle_event("new_game", _params, socket) do
-    game = GameServer.new_game()
-    high_scores = GameServer.get_high_scores()
+    game_pid = socket.assigns.game_pid
+    player_id = socket.assigns.player_id
+    game = GameServer.new_game(game_pid)
+    high_scores = GameServer.get_player_high_scores(player_id)
     
     # Extract tiles for display
     tiles_list = extract_tiles_for_display(game)
@@ -96,13 +106,14 @@ defmodule Game2048Web.GameLive do
     if direction do
       # Save the old state to compare later
       old_game = socket.assigns.game
+      game_pid = socket.assigns.game_pid
       
       # Skip move processing if game is over
       if old_game.game_over do
         {:noreply, socket}
       else
-        # Make the move
-        game = GameServer.move(direction)
+        # Make the move on THIS PLAYER'S game
+        game = GameServer.move(game_pid, direction)
         
         # Check for game state changes
         alert = cond do
@@ -139,13 +150,14 @@ defmodule Game2048Web.GameLive do
     
     # Save the old state to compare later
     old_game = socket.assigns.game
+    game_pid = socket.assigns.game_pid
     
     # Skip move processing if game is over
     if old_game.game_over do
       {:noreply, socket}
     else
-      # Make the move
-      game = GameServer.move(dir)
+      # Make the move on THIS PLAYER'S game
+      game = GameServer.move(game_pid, dir)
       
       # Check for game state changes
       alert = cond do
@@ -184,12 +196,13 @@ defmodule Game2048Web.GameLive do
   def handle_event("force_win", _, socket) do
     # Get the current game state
     game = socket.assigns.game
+    game_pid = socket.assigns.game_pid
     
     # Create a modified game state with win condition
     updated_game = %{game | won: true}
     
     # Save the updated game state in the server
-    GameServer.update_state(updated_game)
+    GameServer.update_state(game_pid, updated_game)
     
     # Update tiles for display
     tiles_list = extract_tiles_for_display(updated_game)
@@ -205,12 +218,13 @@ defmodule Game2048Web.GameLive do
   def handle_event("force_lose", _, socket) do
     # Get the current game state
     game = socket.assigns.game
+    game_pid = socket.assigns.game_pid
     
     # Create a modified game state with game over condition
     updated_game = %{game | game_over: true}
     
     # Save the updated game state in the server
-    GameServer.update_state(updated_game)
+    GameServer.update_state(game_pid, updated_game)
     
     # Update tiles for display
     tiles_list = extract_tiles_for_display(updated_game)
@@ -251,8 +265,9 @@ defmodule Game2048Web.GameLive do
   
   @impl true
   def handle_info({:new_high_score, _score}, socket) do
-    # Fetch updated high scores
-    high_scores = GameServer.get_high_scores()
+    # Fetch updated high scores for this player
+    player_id = socket.assigns.player_id
+    high_scores = GameServer.get_player_high_scores(player_id)
     
     # Set highlight flag to trigger animation
     socket = socket

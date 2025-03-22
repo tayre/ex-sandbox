@@ -10,6 +10,8 @@ defmodule Game2048.Application do
     children = [
       # Add restart strategy and increased timeouts
       {Phoenix.PubSub, name: Game2048.PubSub, pool_size: 1},
+      # Registry for tracking player-specific game servers
+      {Registry, keys: :unique, name: Game2048.GameRegistry},
       # Start the ScoreStore before GameServer with optimized settings
       {Game2048.ScoreStore, []},
       # Start the Game2048 GenServer with optimized settings
