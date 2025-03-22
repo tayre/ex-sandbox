@@ -88,7 +88,7 @@
                   <h2 class="text-2xl font-bold mb-3">Game Over!</h2>
                   <p class="text-lg mb-4">Your score: <span class="font-bold"><%= @game.score %></span></p>
                 <% end %>
-                <button phx-click="new_game" class="game-button px-6 py-3 rounded-lg text-base w-full">
+                <button phx-click="new_game" phx-touch-start="new_game" class="game-button px-6 py-3 rounded-lg text-base w-full">
                   Play Again
                 </button>
               </div>
@@ -124,7 +124,7 @@
         
         <!-- New Game button centered at the bottom -->
         <div class="w-full max-w-md flex justify-center mb-6">
-          <button phx-click="new_game" class="game-button px-6 py-3 rounded-lg text-base">
+          <button phx-click="new_game" phx-touch-start="new_game" class="game-button px-6 py-3 rounded-lg text-base">
             New Game
           </button>
         </div>

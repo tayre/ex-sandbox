@@ -482,3 +482,28 @@ button:focus-visible,
     opacity: 0.3;
   }
 }
+
+/* Mobile specific improvements */
+@media (max-width: 767px) {
+  .game-button {
+    padding: 12px 18px;
+    font-size: 18px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    cursor: pointer;
+  }
+  
+  .game-button:active {
+    background: linear-gradient(to bottom, #4338ca, #3730a3);
+    transform: translateY(2px);
+    box-shadow: 0 2px 5px rgba(67, 56, 202, 0.3);
+  }
+}
+
+/* Fix for mobile overlay buttons */
+.absolute .game-button {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
