@@ -151,10 +151,12 @@ defmodule Game2048.GameServer do
   @impl true
   def handle_call(:new_game, _from, %{player_id: player_id} = state) do
     # If the game is over and has a score, save it
-    if state.game.game_over and state.game.score > 0 and player_id do
-      ScoreStore.submit_player_score(player_id, state.game.score)
-    elsif state.game.game_over and state.game.score > 0 do
-      ScoreStore.submit_score(state.game.score) # Fallback for global scores
+    if state.game.game_over and state.game.score > 0 do
+      if player_id do
+        ScoreStore.submit_player_score(player_id, state.game.score)
+      else
+        ScoreStore.submit_score(state.game.score) # Fallback for global scores
+      end
     end
     
     new_game = Game.new()
@@ -179,17 +181,19 @@ defmodule Game2048.GameServer do
       # Only broadcast if the game state changed
       if new_game != game do
         # If the game just ended, save the score
-        if new_game.game_over and not game.game_over and new_game.score > 0 and player_id do
-          is_high_score = ScoreStore.submit_player_score(player_id, new_game.score)
-          
-          # Broadcast the high score update if there's a player_id
-          if is_high_score and player_id do
-            topic = "game:#{player_id}"
-            PubSub.broadcast(@pubsub, topic, {:new_high_score, new_game.score})
+        if new_game.game_over and not game.game_over and new_game.score > 0 do
+          if player_id do
+            is_high_score = ScoreStore.submit_player_score(player_id, new_game.score)
+            
+            # Broadcast the high score update if there's a player_id
+            if is_high_score do
+              topic = "game:#{player_id}"
+              PubSub.broadcast(@pubsub, topic, {:new_high_score, new_game.score})
+            end
+          else
+            # Fallback for global scores
+            ScoreStore.submit_score(new_game.score)
           end
-        elsif new_game.game_over and not game.game_over and new_game.score > 0 do
-          # Fallback for global scores
-          ScoreStore.submit_score(new_game.score)
         end
         
         # Broadcast game state update if there's a player_id
