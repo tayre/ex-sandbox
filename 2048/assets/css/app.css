@@ -61,7 +61,8 @@ body {
   border-radius: 0.375rem;
   font-weight: bold;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.15s ease-in-out;
+  transition: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+  will-change: transform;
 }
 
 /* Tile animation */
@@ -327,23 +328,63 @@ body {
 
 /* Slide animations */
 @keyframes slide-left {
-  0% { transform: translateX(3%); }
-  100% { transform: translateX(0); }
+  from {
+    transform: translateX(8px);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-right {
-  0% { transform: translateX(-3%); }
-  100% { transform: translateX(0); }
+  from {
+    transform: translateX(-8px);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  0% { transform: translateY(3%); }
-  100% { transform: translateY(0); }
+  from {
+    transform: translateY(8px);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes slide-down {
-  0% { transform: translateY(-3%); }
-  100% { transform: translateY(0); }
+  from {
+    transform: translateY(-8px);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-left {
+  animation: slide-left 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.slide-right {
+  animation: slide-right 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.slide-up {
+  animation: slide-up 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.slide-down {
+  animation: slide-down 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /* Add these classes to JSHook to apply during transitions */
